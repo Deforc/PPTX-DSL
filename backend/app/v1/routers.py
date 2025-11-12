@@ -20,9 +20,12 @@ from app.web.models.models import (
 )
 
 
+from backend.app.v1.endpoints.validate import router as validation_router
+
 router = APIRouter()
 file_service = FileService()
 
+router.include_router(validation_router)
 
 @router.get("/healthz", summary="Проверка на то, насколько жив сервис")
 def heallthz() -> dict:
