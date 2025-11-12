@@ -10,17 +10,7 @@ import os
 import json
 from app.domain.entities import Slide
 
-from app.web.models.models import (
-    UploadResponse,
-    ProcessingResponse,
-    PresentationDetailResponse,
-    SlideInfo,
-    ErrorResponse,
-    ProcessingStatus
-)
-
-
-from backend.app.v1.endpoints.validate import router as validation_router
+from app.v1.endpoints.validate import router as validation_router
 
 router = APIRouter()
 file_service = FileService()

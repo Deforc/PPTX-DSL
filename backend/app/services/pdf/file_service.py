@@ -1,134 +1,155 @@
 import uuid
 import shutil
 from pathlib import Path
-from typing import Optional, Dict, Any
-from datetime import datetime
+from typing import Dict, Any
 from fastapi import UploadFile, HTTPException
-import os
+import tempfile
 
 from app.domain.entities import Presentation
 from app.services.pdf.pdf_processing import PdfProcessingService
 
 class FileService:
-    """Сервис для управления загруженными файлами"""
-    
-    def __init__(self, upload_dir: str = "uploads", processed_dir: str = "processed"):
-        self.upload_dir = Path(upload_dir)
-        self.processed_dir = Path(processed_dir)
+    def __init__(self):
         self.processing_service = PdfProcessingService()
-        
-        self.upload_dir.mkdir(exist_ok=True)
-        self.processed_dir.mkdir(exist_ok=True)
-        
-        self.processing_status: Dict[str, Dict[str, Any]] = {}
     
-    def save_uploaded_file(self, file: UploadFile) -> str:
-        """Сохраняет загруженный файл и возвращает file_id"""
-        file_id = str(uuid.uuid4())
+    def process_uploaded_files(self, pdf_file: UploadFile, yaml_file: UploadFile) -> Dict[str, Any]:
+        """Обрабатывает PDF с применением YAML правил и возвращает результат"""
         
-        original_filename = file.filename or "unknown.pdf"
-        safe_filename = self._create_safe_filename(original_filename, file_id)
-        file_path = self.upload_dir / safe_filename
+        # Создаем временные файлы
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as pdf_temp:
+            # Сохраняем PDF во временный файл
+            pdf_content = pdf_file.file.read()
+            pdf_temp.write(pdf_content)
+            pdf_temp_path = pdf_temp.name
         
         try:
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+            # Парсим YAML правила
+            yaml_content = yaml_file.file.read().decode('utf-8')
             
-            self.processing_status[file_id] = {
-                "file_id": file_id,
-                "filename": original_filename,
-                "file_path": file_path,
-                "status": "pending",
-                "created_at": datetime.now(),
-                "error_message": None,
-                "result": None
-            }
+            # Обрабатываем PDF
+            presentation: Presentation = self.processing_service.process_pdf(Path(pdf_temp_path))
             
-            return file_id
+            # Применяем правила валидации
+            validation_result = self._validate_presentation(presentation, None)
             
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Ошибка сохранения файла: {str(e)}"
-            )
-    
-    def process_file(self, file_id: str) -> Dict[str, Any]:
-        """Обрабатывает PDF файл"""
-        if file_id not in self.processing_status:
-            raise HTTPException(status_code=404, detail="Файл не найден")
-        
-        status = self.processing_status[file_id]
-        status["status"] = "processing"
-        
-        try:
-            start_time = datetime.now()
-            presentation: Presentation = self.processing_service.process_pdf(status["file_path"])
-            processing_time = (datetime.now() - start_time).total_seconds()
-            
-            page_number_analysis = self.processing_service.get_page_number_analysis(presentation)
-            
-            result = {
+            return {
                 "presentation": presentation,
-                "processing_time": processing_time,
-                "page_number_analysis": page_number_analysis,
-                "slides_count": len(presentation.slides)
+                "validation_result": validation_result,
+                "pdf_filename": pdf_file.filename,
+                "yaml_filename": yaml_file.filename
             }
             
-            status.update({
-                "status": "completed",
-                "result": result,
-                "processing_time": processing_time,
-                "completed_at": datetime.now()
-            })
-            
-            return result
-            
         except Exception as e:
-            status.update({
-                "status": "failed",
-                "error_message": str(e),
-                "completed_at": datetime.now()
-            })
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Ошибка обработки PDF: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Ошибка обработки: {str(e)}")
+        finally:
+            # Удаляем временный файл
+            Path(pdf_temp_path).unlink(missing_ok=True)
     
-    def get_status(self, file_id: str) -> Dict[str, Any]:
-        """Возвращает статус обработки файла"""
-        if file_id not in self.processing_status:
-            raise HTTPException(status_code=404, detail="Файл не найден")
+    def _validate_presentation(self, presentation: Presentation, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Применяет правила валидации к презентации"""
+        logs = []
+        errors = 0
+        warnings = 0
+        infos = 0
         
-        return self.processing_status[file_id]
+        # Начальные логи
+        logs.append("[INFO] Начата проверка презентации...")
+        logs.append(f"[INFO] Загружена презентация: {presentation.file_path.name}")
+        logs.append(f"[INFO] Обработано слайдов: {len(presentation.slides)}")
+        infos += 3
+        
+        # Анализ шрифтов
+        fonts_analysis = self._analyze_fonts(presentation)
+        logs.append(f"[INFO] Обнаружено шрифтов: {fonts_analysis['total_unique_fonts']}")
+        infos += 1
+        if fonts_analysis['total_unique_fonts'] > 1 :
+            errors+=1
+            logs.append(f"[ERROR]Шрифтов больше, чем требуется ")
+        # Проверка номеров страниц
+        min_coverage = len(presentation.slides)
+        slides_with_page_numbers = sum(1 for slide in presentation.slides if slide.detected_page_number)
+        coverage = slides_with_page_numbers / len(presentation.slides) if presentation.slides else 0
+        
+        if coverage < min_coverage:
+            logs.append(f"[WARN] Только {slides_with_page_numbers}/{len(presentation.slides)} слайдов имеют номера страниц (покрытие: {coverage:.1%})")
+            warnings += 1
+        else:
+            logs.append(f"[INFO] Покрытие номеров страниц: {coverage:.1%} ({slides_with_page_numbers}/{len(presentation.slides)})")
+            infos += 1
+        
+        
+        layout_analysis = self._analyze_layouts(presentation)
+        logs.append(f"[INFO] Распределение layout: {layout_analysis}")
+        infos += 1
+        
+        logs.append(f"[INFO] Проверка завершена. Обнаружено: {errors} ошибок, {warnings} предупреждений.")
+        infos += 1
+        
+        return {
+            "logs": logs,
+            "summary": {
+                "total_logs": len(logs),
+                "errors": errors,
+                "warnings": warnings,
+                "infos": infos
+            },
+            "detailed_analysis": {
+                "total_slides": len(presentation.slides),
+                "slides_with_page_numbers": slides_with_page_numbers,
+                "page_number_coverage": coverage,
+                "fonts_analysis": fonts_analysis,
+                "layout_analysis": layout_analysis
+            }
+        }
     
-    def get_result(self, file_id: str) -> Dict[str, Any]:
-        """Возвращает результат обработки"""
-        status = self.get_status(file_id)
-        if status["status"] != "completed":
-            raise HTTPException(
-                status_code=400, 
-                detail="Обработка еще не завершена"
-            )
-        
-        return status["result"]
+    def _count_fonts_on_slide(self, slide) -> int:
+        """Считает количество уникальных шрифтов на слайде"""
+        fonts = set()
+        for block in slide.blocks:
+            for run in block.runs:
+                if run.font_family:
+                    fonts.add(run.font_family)
+        return len(fonts)
     
-    def _create_safe_filename(self, original_filename: str, file_id: str) -> str:
-        """Создает безопасное имя файла"""
-        extension = Path(original_filename).suffix.lower()
-        if extension not in ['.pdf']:
-            extension = '.pdf'
+    def _analyze_fonts(self, presentation: Presentation) -> Dict[str, Any]:
+        """Анализирует использование шрифтов"""
+        all_fonts = set()
+        font_usage = {}
         
-        safe_name = original_filename.replace(' ', '_').replace('/', '_')
-        return f"{file_id}_{safe_name}"
+        for slide in presentation.slides:
+            for block in slide.blocks:
+                for run in block.runs:
+                    if run.font_family:
+                        all_fonts.add(run.font_family)
+                        font_usage[run.font_family] = font_usage.get(run.font_family, 0) + 1
+        
+        return {
+            "unique_fonts": list(all_fonts),
+            "total_unique_fonts": len(all_fonts),
+            "font_usage": font_usage
+        }
     
-    def cleanup_old_files(self, max_age_hours: int = 24):
-        """Очищает старые файлы"""
-        current_time = datetime.now()
+    def _analyze_layouts(self, presentation: Presentation) -> Dict[str, int]:
+        """Анализирует layout слайдов"""
+        layouts = {}
+        for i, slide in enumerate(presentation.slides, 1):
+            layout_type = self._detect_slide_layout(slide)
+            layouts[layout_type] = layouts.get(layout_type, 0) + 1
         
-        for file_id, status in list(self.processing_status.items()):
-            file_age = (current_time - status["created_at"]).total_seconds() / 3600
-            
-            if file_age > max_age_hours:
-                if status["file_path"].exists():
-                    status["file_path"].unlink()
-                del self.processing_status[file_id]
+        return layouts
+    
+    def _detect_slide_layout(self, slide) -> str:
+        """Определяет тип layout слайда"""
+        if not slide.blocks:
+            return "blank"
+        
+        total_text_length = sum(len(block.text) for block in slide.blocks)
+        
+        if len(slide.blocks) == 1 and total_text_length < 100:
+            return "title"
+        elif len(slide.blocks) <= 3 and total_text_length < 300:
+            return "content"
+        elif len(slide.blocks) <= 5:
+            return "detailed"
+        else:
+            return "complex"
