@@ -3,16 +3,26 @@
     <h1 class="title">Проверка форматирования презентаций</h1>
 
     <div class="drop-zone" @dragover="allowDrop" @drop="handlePdfDrop">
-      <p>Перетащите PDF-файл сюда</p>
+      <p v-if="!pdfFile">Перетащите PDF-файл сюда</p>
+      <p v-else class="file-name">Загружен: {{ pdfFile.name }}</p>
       <input type="file" accept=".pdf" @change="handlePdfSelect" />
     </div>
 
     <div class="drop-zone" @dragover="allowDrop" @drop="handleYamlDrop">
-      <p>Перетащите YAML-файл с DSL сюда</p>
+      <p v-if="!yamlFile">Перетащите YAML-файл с DSL сюда</p>
+      <p v-else class="file-name">Загружен: {{ yamlFile.name }}</p>
       <input type="file" accept=".yaml,.yml" @change="handleYamlSelect" />
     </div>
 
-    <div class="status-bar" :class="{ 'success': status === 'ok', 'error': status === 'error' }">
+    <button
+      class="validate-btn"
+      :disabled="!areFilesReady"
+      @click="submitFiles"
+    >
+      {{ statusText === 'Проверка...' ? 'Проверка...' : 'Запустить проверку' }}
+    </button>
+
+    <div class="status-bar" :class="{ 'success': status === 'ok', 'error': status === 'error', 'warning': status === 'warning' }">
       {{ statusText }}
     </div>
 
@@ -38,6 +48,11 @@ export default {
       statusText: 'Ожидание файлов...'
     }
   },
+  computed: {
+    areFilesReady() {
+      return this.pdfFile && this.yamlFile
+    }
+  },
   methods: {
     allowDrop(e) {
       e.preventDefault()
@@ -47,7 +62,7 @@ export default {
       const file = e.dataTransfer.files[0]
       if (file && file.type === 'application/pdf') {
         this.pdfFile = file
-        this.checkReady()
+        // this.checkReady()
       } else {
         alert('Пожалуйста, перетащите PDF-файл')
       }
@@ -56,7 +71,7 @@ export default {
       const file = e.target.files[0]
       if (file) {
         this.pdfFile = file
-        this.checkReady()
+        // this.checkReady()
       }
     },
     handleYamlDrop(e) {
@@ -65,7 +80,7 @@ export default {
       const ext = file.name.split('.').pop().toLowerCase()
       if (file && (ext === 'yaml' || ext === 'yml')) {
         this.yamlFile = file
-        this.checkReady()
+        // this.checkReady()
       } else {
         alert('Пожалуйста, перетащите YAML-файл')
       }
@@ -74,18 +89,51 @@ export default {
       const file = e.target.files[0]
       if (file) {
         this.yamlFile = file
-        this.checkReady()
+        // this.checkReady()
       }
     },
-    checkReady() {
-      if (this.pdfFile && this.yamlFile) {
-        // Здесь будет вызов API
-        setTimeout(() => {
-          this.statusText = 'Проверено. Есть ошибки'
-          this.status = 'error'
-        }, 1000)
-      }
+    async submitFiles() {
+    if (!this.pdfFile || !this.yamlFile) {
+      alert('Загрузите оба файла')
+      return
     }
+
+    const formData = new FormData()
+    formData.append('pdf_file', this.pdfFile)
+    formData.append('yaml_file', this.yamlFile)
+
+    this.status = ''
+    this.statusText = 'Проверка...'
+
+    try {
+      const response = await fetch('http://localhost:8000/validate', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        this.statusText = 'Проверено. Есть ошибки'
+        this.status = 'error'
+        this.$refs.logs.textContent = result.logs.join('\n')
+      } else {
+        this.statusText = 'Ошибка проверки'
+        this.status = 'error'
+        this.$refs.logs.textContent = '[ERROR] Не удалось выполнить проверку'
+      }
+    } catch (err) {
+      this.statusText = 'Ошибка подключения'
+      this.status = 'error'
+      this.$refs.logs.textContent = `[ERROR] ${err.message}`
+    }
+  },
+
+  // checkReady() {
+  //   if (this.pdfFile && this.yamlFile) {
+  //     // Автоматически отправляем (или можно добавить кнопку)
+  //     this.submitFiles()
+  //   }
+  // }
   }
 }
 </script>
@@ -188,6 +236,37 @@ export default {
   box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.12);
   white-space: pre-wrap;
   line-height: 1.6;
+}
+.validate-btn {
+  display: block;
+  margin: 20px auto;
+  padding: 12px 24px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+}
+
+.validate-btn:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+.validate-btn:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.validate-btn:focus {
+  outline: none;
 }
 </style>
 <style>
