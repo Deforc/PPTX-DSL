@@ -1,12 +1,17 @@
 import os
 from pathlib import Path
+import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.core.config import get_settings
-from backend.app.core.logging import setup_logging
-from backend.app.v1.routers import router
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.services.pdf.pdf_processing import PdfProcessingService
+from app.core.config import get_settings
+from app.core.logging import setup_logging
+from app.v1.routers import router
 
 def create_app() -> FastAPI:
     s = get_settings()
