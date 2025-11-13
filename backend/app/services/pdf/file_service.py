@@ -23,6 +23,8 @@ class FileService:
         try:
             yaml_content = yaml_file.file.read().decode('utf-8')
             
+
+            ## Место для парсера DSL
             presentation: Presentation = self.processing_service.process_pdf(Path(pdf_temp_path))
             
             validation_result = self._validate_presentation(presentation, None)
