@@ -34,4 +34,3 @@ class SlidesCountCheck(PresentationCheck):
             rule_name=self.rule_name,
             message=f"Количество слайдов {slides_count} в допустимых пределах"
         )
-

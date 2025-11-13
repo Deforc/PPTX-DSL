@@ -58,4 +58,3 @@ class HeadingPresenceCheck(SlideCheck):
         avg_other_size = sum(other_blocks_sizes) / len(other_blocks_sizes)
         
         return avg_font_size > avg_other_size * 1.2
-

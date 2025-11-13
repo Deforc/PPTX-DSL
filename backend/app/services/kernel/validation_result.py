@@ -19,4 +19,3 @@ class ValidationResult:
     severity: Severity
     rule_name: str
     message: str
-
