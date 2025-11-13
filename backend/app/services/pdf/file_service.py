@@ -15,21 +15,16 @@ class FileService:
     def process_uploaded_files(self, pdf_file: UploadFile, yaml_file: UploadFile) -> Dict[str, Any]:
         """Обрабатывает PDF с применением YAML правил и возвращает результат"""
         
-        # Создаем временные файлы
         with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as pdf_temp:
-            # Сохраняем PDF во временный файл
             pdf_content = pdf_file.file.read()
             pdf_temp.write(pdf_content)
             pdf_temp_path = pdf_temp.name
         
         try:
-            # Парсим YAML правила
             yaml_content = yaml_file.file.read().decode('utf-8')
             
-            # Обрабатываем PDF
             presentation: Presentation = self.processing_service.process_pdf(Path(pdf_temp_path))
             
-            # Применяем правила валидации
             validation_result = self._validate_presentation(presentation, None)
             
             return {
@@ -42,7 +37,6 @@ class FileService:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Ошибка обработки: {str(e)}")
         finally:
-            # Удаляем временный файл
             Path(pdf_temp_path).unlink(missing_ok=True)
     
     def _validate_presentation(self, presentation: Presentation, rules: Dict[str, Any]) -> Dict[str, Any]:
@@ -52,20 +46,18 @@ class FileService:
         warnings = 0
         infos = 0
         
-        # Начальные логи
         logs.append("[INFO] Начата проверка презентации...")
         logs.append(f"[INFO] Загружена презентация: {presentation.file_path.name}")
         logs.append(f"[INFO] Обработано слайдов: {len(presentation.slides)}")
         infos += 3
         
-        # Анализ шрифтов
         fonts_analysis = self._analyze_fonts(presentation)
         logs.append(f"[INFO] Обнаружено шрифтов: {fonts_analysis['total_unique_fonts']}")
         infos += 1
         if fonts_analysis['total_unique_fonts'] > 1 :
             errors+=1
             logs.append(f"[ERROR]Шрифтов больше, чем требуется ")
-        # Проверка номеров страниц
+
         min_coverage = len(presentation.slides)
         slides_with_page_numbers = sum(1 for slide in presentation.slides if slide.detected_page_number)
         coverage = slides_with_page_numbers / len(presentation.slides) if presentation.slides else 0

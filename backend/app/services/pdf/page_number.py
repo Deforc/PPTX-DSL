@@ -6,24 +6,20 @@ class PageNumberDetector:
     """Сервис для обнаружения и проверки номеров страниц"""
     
     def __init__(self):
-        # Паттерны для номеров страниц
         self.page_number_patterns = [
-            # Простые числа
             r'^\d{1,3}$',
-            # Числа с разделителями: "1 / 10", "1 из 10"
             r'^\d{1,3}\s*[/\\\-]\s*\d{1,3}$',
             r'^\d{1,3}\s+из\s+\d{1,3}$',
         ]
         
-        # Позиции номеров страниц (нормализованные координаты)
         self.positions = {
-            PageNumberPosition.BOTTOM_RIGHT: (0.7, 0.9, 0.9, 1.0),  # правый нижний угол
-            PageNumberPosition.BOTTOM_CENTER: (0.4, 0.9, 0.6, 1.0), # центр снизу
-            PageNumberPosition.BOTTOM_LEFT: (0.0, 0.9, 0.3, 1.0),   # левый нижний угол
-            PageNumberPosition.TOP_RIGHT: (0.7, 0.0, 0.9, 0.1),     # правый верхний угол
-            PageNumberPosition.TOP_CENTER: (0.4, 0.0, 0.6, 0.1),    # центр сверху
-            PageNumberPosition.TOP_LEFT: (0.0, 0.0, 0.3, 0.1),      # левый верхний угол
-            PageNumberPosition.CORNER: (0.9, 0.9, 1.0, 1.0),        # самый угол
+            PageNumberPosition.BOTTOM_RIGHT: (0.7, 0.9, 0.9, 1.0),  
+            PageNumberPosition.BOTTOM_CENTER: (0.4, 0.9, 0.6, 1.0), 
+            PageNumberPosition.BOTTOM_LEFT: (0.0, 0.9, 0.3, 1.0),   
+            PageNumberPosition.TOP_RIGHT: (0.7, 0.0, 0.9, 0.1),     
+            PageNumberPosition.TOP_CENTER: (0.4, 0.0, 0.6, 0.1),    
+            PageNumberPosition.TOP_LEFT: (0.0, 0.0, 0.3, 0.1),      
+            PageNumberPosition.CORNER: (0.9, 0.9, 1.0, 1.0),        
         }
     
     def detect_page_numbers(self, slides: List[Slide]) -> List[Slide]:
@@ -31,7 +27,6 @@ class PageNumberDetector:
         for slide in slides:
             self._detect_slide_page_number(slide)
         
-        # Валидация последовательности номеров
         self._validate_page_number_sequence(slides)
         
         return slides
@@ -52,11 +47,10 @@ class PageNumberDetector:
                     'position': self._detect_position(block.bbox, slide.width, slide.height)
                 })
         
-        # Выбираем лучшего кандидата
         if page_number_candidates:
             best_candidate = max(page_number_candidates, key=lambda x: x['confidence'])
             
-            if best_candidate['confidence'] > 0.5:  # Порог уверенности
+            if best_candidate['confidence'] > 0.5:  
                 slide.detected_page_number = best_candidate['block'].text
                 slide.page_number_position = best_candidate['position']
                 slide.page_number_bbox = best_candidate['block'].bbox
@@ -64,15 +58,15 @@ class PageNumberDetector:
     def _is_page_number_candidate(self, text: str, bbox: Tuple[float, float, float, float], 
                                 page_width: float, page_height: float) -> bool:
         """Проверяет, является ли блок кандидатом в номер страницы"""
-        # Проверяем текст по паттернам
+        
         if not self._matches_page_number_pattern(text):
             return False
         
-        # Проверяем позицию на странице
+        
         if not self._is_in_page_number_zone(bbox, page_width, page_height):
             return False
         
-        # Проверяем размер блока (номера страниц обычно небольшие)
+        
         bbox_width = bbox[2] - bbox[0]
         bbox_height = bbox[3] - bbox[1]
         
@@ -97,7 +91,7 @@ class PageNumberDetector:
         x_center = (bbox[0] + bbox[2]) / 2 / page_width
         y_center = (bbox[1] + bbox[3]) / 2 / page_height
         
-        # Зоны расположения номеров страниц (нормализованные координаты)
+        
         page_number_zones = [
             (0.7, 0.9, 1.0, 1.0),  # правый нижний угол
             (0.4, 0.9, 0.6, 1.0),  # центр снизу
@@ -119,10 +113,8 @@ class PageNumberDetector:
         """Вычисляет уверенность, что это номер страницы (0-1)"""
         confidence = 0.0
         
-        # Базовые критерии
         clean_text = text.strip()
         
-        # Критерий 1: соответствие паттерну
         if re.match(r'^\d{1,3}$', clean_text):
             confidence += 0.4
         elif re.match(r'^\d{1,3}\s*[/\\\-]\s*\d{1,3}$', clean_text):
@@ -130,13 +122,11 @@ class PageNumberDetector:
         else:
             confidence += 0.2
         
-        # Критерий 2: позиция на странице
         position_confidence = self._calculate_position_confidence(bbox, page_width, page_height)
         confidence += position_confidence * 0.4
         
-        # Критерий 3: размер текста (номера страниц обычно мелкие)
         bbox_height = bbox[3] - bbox[1]
-        if bbox_height < page_height * 0.02:  # Меньше 2% высоты страницы
+        if bbox_height < page_height * 0.02:  
             confidence += 0.2
         
         return min(confidence, 1.0)
@@ -147,7 +137,6 @@ class PageNumberDetector:
         x_center = (bbox[0] + bbox[2]) / 2 / page_width
         y_center = (bbox[1] + bbox[3]) / 2 / page_height
         
-        # Наиболее вероятные позиции (с весами)
         position_weights = [
             # (x_min, x_max, y_min, y_max, weight)
             (0.85, 1.0, 0.85, 1.0, 1.0),   # правый нижний угол - самый вероятный
@@ -163,7 +152,7 @@ class PageNumberDetector:
                 y_min <= y_center <= y_max):
                 return weight
         
-        return 0.1  # Минимальная уверенность для других позиций
+        return 0.1  
     
     def _detect_position(self, bbox: Tuple[float, float, float, float],
                        page_width: float, page_height: float) -> PageNumberPosition:
@@ -171,14 +160,14 @@ class PageNumberDetector:
         x_center = (bbox[0] + bbox[2]) / 2 / page_width
         y_center = (bbox[1] + bbox[3]) / 2 / page_height
         
-        if y_center > 0.7:  # Нижняя часть страницы
+        if y_center > 0.7:  
             if x_center > 0.7:
                 return PageNumberPosition.BOTTOM_RIGHT
             elif x_center < 0.3:
                 return PageNumberPosition.BOTTOM_LEFT
             else:
                 return PageNumberPosition.BOTTOM_CENTER
-        else:  # Верхняя часть страницы
+        else:  
             if x_center > 0.7:
                 return PageNumberPosition.TOP_RIGHT
             elif x_center < 0.3:
@@ -193,9 +182,8 @@ class PageNumberDetector:
         if len(numbered_slides) < 2:
             return
         
-        # Пытаемся определить формат нумерации
+        
         try:
-            # Проверяем арабские цифры
             arabic_numbers = []
             for slide in numbered_slides:
                 numbers = re.findall(r'\d+', slide.detected_page_number)
@@ -203,7 +191,6 @@ class PageNumberDetector:
                     arabic_numbers.append(int(numbers[0]))
             
             if len(arabic_numbers) >= 2:
-                # Проверяем последовательность
                 expected_sequence = list(range(min(arabic_numbers), max(arabic_numbers) + 1))
                 if arabic_numbers != expected_sequence:
                     print(f"Предупреждение: непоследовательная нумерация страниц: {arabic_numbers}")

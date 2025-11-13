@@ -14,13 +14,10 @@ class LayoutAnalyzer:
         if not text_runs:
             return []
         
-        # Группируем в строки
         lines = self._group_to_lines(text_runs)
         
-        # Группируем строки в абзацы
         paragraphs = self._group_to_paragraphs(lines)
         
-        # Определяем списки и их структуру
         paragraphs = self._detect_lists(paragraphs)
         
         return paragraphs
@@ -36,7 +33,6 @@ class LayoutAnalyzer:
         for run in runs[1:]:
             prev_run = current_line[-1]
             
-            # Проверяем вертикальную близость (используем среднюю Y-координату)
             prev_y = (prev_run.bbox[1] + prev_run.bbox[3]) / 2
             curr_y = (run.bbox[1] + run.bbox[3]) / 2
             y_diff = abs(curr_y - prev_y)
@@ -44,7 +40,6 @@ class LayoutAnalyzer:
             if y_diff <= self.line_threshold:
                 current_line.append(run)
             else:
-                # Сортируем runs в линии по X
                 current_line_sorted = sorted(current_line, key=lambda r: r.bbox[0])
                 lines.append(current_line_sorted)
                 current_line = [run]
@@ -67,17 +62,14 @@ class LayoutAnalyzer:
             prev_line = lines[i-1]
             curr_line = lines[i]
             
-            # Вычисляем вертикальный разрыв
             prev_bottom = min(run.bbox[3] for run in prev_line)
             curr_top = min(run.bbox[1] for run in curr_line)
             vertical_gap = curr_top - prev_bottom
             
-            # Вычисляем горизонтальный сдвиг
             prev_left = min(run.bbox[0] for run in prev_line)
             curr_left = min(run.bbox[0] for run in curr_line)
             indent_diff = abs(curr_left - prev_left)
             
-            # Эвристика для определения нового абзаца
             if vertical_gap > 10 or indent_diff > 20:
                 paragraph = self._create_paragraph(current_paragraph_lines)
                 paragraphs.append(paragraph)
@@ -95,13 +87,11 @@ class LayoutAnalyzer:
         """Создает ParagraphBlock из линий"""
         all_runs = [run for line in lines for run in line]
         
-        # Вычисляем общий bbox
         x0 = min(run.bbox[0] for run in all_runs)
         y0 = min(run.bbox[1] for run in all_runs)
         x1 = max(run.bbox[2] for run in all_runs)
         y1 = max(run.bbox[3] for run in all_runs)
         
-        # Объединяем текст
         full_text = ''.join(run.text for run in all_runs)
         
         return Paragraph(
@@ -130,14 +120,12 @@ class LayoutAnalyzer:
         if not stripped:
             return ListType.NONE, "", text
         
-        # Bullet символы
         bullet_symbols = ['•', '·', '∙', '◦', '-', '—', '*', '+', '‣']
         if any(stripped.startswith(sym) for sym in bullet_symbols):
             prefix = stripped[0]
             clean_text = stripped[1:].strip()
             return ListType.BULLET, prefix, clean_text
         
-        # Нумерованные списки
         numbered_patterns = [
             r'^\d+\.',      # 1.
             r'^\d+\)',      # 1)

@@ -12,4 +12,4 @@ class BaseParser(ABC):
     
     def can_parse(self, file_path: Path) -> bool:
         """Проверяет, может ли парсер обработать файл"""
-        return file_path.suffix.lower() in self.supported_formats()
+        return file_path.suffix.lower() == ".pdf"
