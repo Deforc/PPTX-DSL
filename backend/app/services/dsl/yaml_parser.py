@@ -10,6 +10,13 @@ from app.services.kernel.base_checks import PresentationCheck, SlideCheck
 from app.services.kernel.checks.slides_count_check import SlidesCountCheck
 from app.services.kernel.checks.font_count_check import FontCountPresentationCheck, FontCountSlideCheck
 from app.services.kernel.checks.heading_presence_check import HeadingPresenceCheck
+from app.services.kernel.checks.font_sizes_count_check import FontSizesCountPresentationCheck, FontSizesCountSlideCheck
+from app.services.kernel.checks.sentence_length_check import SentenceLengthCheck
+from app.services.kernel.checks.list_nesting_check import ListNestingCheck
+from app.services.kernel.checks.list_consistency_check import ListConsistencyPresentationCheck, ListConsistencySlideCheck
+from app.services.kernel.checks.font_min_size_check import FontMinSizePresentationCheck, FontMinSizeSlideCheck
+from app.services.kernel.checks.uppercase_percent_check import UppercasePercentPresentationCheck, UppercasePercentSlideCheck
+from app.services.kernel.checks.elements_count_check import ElementsCountCheck
 
 
 class DSLParseError(Exception):
@@ -30,7 +37,27 @@ class CheckRegistry:
         'font_count': {
             'class': FontCountPresentationCheck,
             'available_levels': ['presentation', 'slide'],
-            'default_level': None  # требуется явное указание
+            'default_level': None
+        },
+        'font_sizes_count': {
+            'class': FontSizesCountPresentationCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'list_consistency': {
+            'class': ListConsistencyPresentationCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'font_min_size': {
+            'class': FontMinSizePresentationCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'uppercase_percent': {
+            'class': UppercasePercentPresentationCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
         }
     }
     
@@ -39,10 +66,45 @@ class CheckRegistry:
         'font_count': {
             'class': FontCountSlideCheck,
             'available_levels': ['presentation', 'slide'],
-            'default_level': None  # требуется явное указание
+            'default_level': None
         },
         'heading_presence': {
             'class': HeadingPresenceCheck,
+            'available_levels': ['slide'],
+            'default_level': 'slide'
+        },
+        'font_sizes_count': {
+            'class': FontSizesCountSlideCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'sentence_length': {
+            'class': SentenceLengthCheck,
+            'available_levels': ['slide'],
+            'default_level': 'slide'
+        },
+        'list_nesting': {
+            'class': ListNestingCheck,
+            'available_levels': ['slide'],
+            'default_level': 'slide'
+        },
+        'list_consistency': {
+            'class': ListConsistencySlideCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'font_min_size': {
+            'class': FontMinSizeSlideCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'uppercase_percent': {
+            'class': UppercasePercentSlideCheck,
+            'available_levels': ['presentation', 'slide'],
+            'default_level': None
+        },
+        'elements_count': {
+            'class': ElementsCountCheck,
             'available_levels': ['slide'],
             'default_level': 'slide'
         }
