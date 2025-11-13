@@ -61,4 +61,3 @@ class FontCountSlideCheck(SlideCheck):
             rule_name=self.rule_name,
             message=f"Слайд {slide.page_number}: количество шрифтов {font_count} в норме"
         )
-

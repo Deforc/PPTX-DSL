@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from app.services.pdf.file_service import  FileService
+from app.services.file_service import FileService
 
 router = APIRouter(prefix="/validate", tags=["validation"])
 file_service = FileService()
@@ -19,23 +19,12 @@ async def validate_presentation(
     if not yaml_file.filename.lower().endswith((".yaml", ".yml")):
         raise HTTPException(status_code=400, detail="Файл правил должен быть в формате YAML (.yaml или .yml)")
 
-    try:
-        result = file_service.process_uploaded_files(pdf_file, yaml_file)
-        validation_result = result["validation_result"]
-        
-        return JSONResponse({
-            "status": "completed",
-            "pdf_filename": result["pdf_filename"],
-            "yaml_filename": result["yaml_filename"],
-            "logs": validation_result["logs"],
-            "summary": validation_result["summary"],
-            "detailed_analysis": validation_result["detailed_analysis"]
-        })
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Ошибка при обработке файлов: {str(e)}"
-        )
+    result = file_service.process_uploaded_files(pdf_file, yaml_file)
+    
+    return JSONResponse({
+        "status": "success" if result["success"] else "failed",
+        "files": result["files"],
+        "validation": result["validation"],
+        "presentation": result["presentation"],
+        "detailed_results": result["detailed_results"]
+    })

@@ -113,9 +113,19 @@ export default {
 
       if (response.ok) {
         const result = await response.json()
-        this.statusText = 'Проверено. Есть ошибки'
-        this.status = 'error'
-        this.$refs.logs.textContent = result.logs.join('\n')
+        if (result.validation) {
+          this.statusText = result.status === 'failed' 
+            ? 'Проверено. Есть ошибки' 
+            : 'Проверено. Ошибок нет'
+          this.status = result.status === 'failed' ? 'error' : 'ok'
+          this.$refs.logs.textContent = result.validation.logs.join('\n')
+        } else {
+          this.statusText = result.logs ? 'Проверено. Есть ошибки' : 'Неизвестный формат ответа'
+          this.status = 'error'
+          this.$refs.logs.textContent = result.logs 
+            ? result.logs.join('\n') 
+            : JSON.stringify(result, null, 2)
+        }
       } else {
         this.statusText = 'Ошибка проверки'
         this.status = 'error'

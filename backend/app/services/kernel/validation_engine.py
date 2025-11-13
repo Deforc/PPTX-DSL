@@ -26,4 +26,3 @@ class ValidationEngine:
                     results.append(result)
         
         return results
-

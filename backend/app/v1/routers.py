@@ -4,7 +4,6 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks,
 from fastapi.responses import JSONResponse, FileResponse
 
 from app.core.config import get_settings
-from app.services.pdf.file_service import FileService
 from typing import List, Optional
 import os
 import json
@@ -13,7 +12,6 @@ from app.domain.entities import Slide
 from app.v1.endpoints.validate import router as validation_router
 
 router = APIRouter()
-file_service = FileService()
 
 router.include_router(validation_router)
 
