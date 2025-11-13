@@ -123,17 +123,23 @@ class FileService:
         
         # Обрабатываем результаты валидации
         for result in validation_results:
-            severity_prefix = f"[{result.severity.value.upper()}]"
-            log_message = f"{severity_prefix} {result.rule_name}: {result.message}"
+            # Если проверка пройдена - используем [SUCCESS], иначе - severity
+            if result.status == ValidationStatus.PASSED:
+                prefix = "[SUCCESS]"
+            else:
+                prefix = f"[{result.severity.value.upper()}]"
+            
+            log_message = f"{prefix} {result.rule_name}: {result.message}"
             logs.append(log_message)
             
-            # Считаем статистику по severity
-            if result.severity == Severity.ERROR:
-                errors += 1
-            elif result.severity == Severity.WARNING:
-                warnings += 1
-            elif result.severity == Severity.INFO:
-                infos += 1
+            # Считаем статистику только для провалившихся проверок
+            if result.status == ValidationStatus.FAILED:
+                if result.severity == Severity.ERROR:
+                    errors += 1
+                elif result.severity == Severity.WARNING:
+                    warnings += 1
+                elif result.severity == Severity.INFO:
+                    infos += 1
             
         # Итоговая информация
         passed_checks = sum(1 for r in validation_results if r.status == ValidationStatus.PASSED)
