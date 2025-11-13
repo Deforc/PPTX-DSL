@@ -64,7 +64,6 @@ export default {
       const file = e.dataTransfer.files[0]
       if (file && file.type === 'application/pdf') {
         this.pdfFile = file
-        // this.checkReady()
       } else {
         alert('Пожалуйста, перетащите PDF-файл')
       }
@@ -73,7 +72,6 @@ export default {
       const file = e.target.files[0]
       if (file) {
         this.pdfFile = file
-        // this.checkReady()
       }
     },
     handleYamlDrop(e) {
@@ -82,7 +80,6 @@ export default {
       const ext = file.name.split('.').pop().toLowerCase()
       if (file && (ext === 'yaml' || ext === 'yml')) {
         this.yamlFile = file
-        // this.checkReady()
       } else {
         alert('Пожалуйста, перетащите YAML-файл')
       }
@@ -91,7 +88,6 @@ export default {
       const file = e.target.files[0]
       if (file) {
         this.yamlFile = file
-        // this.checkReady()
       }
     },
     getLogPrefixClass(line) {
@@ -109,9 +105,9 @@ export default {
 
     async loadDefaultYaml() {
       try {
-        const response = await fetch('/example_rules_extended.yaml')
+        const response = await fetch('/example_rules_extended_new.yaml')
         const blob = await response.blob()
-        const file = new File([blob], 'example_rules_extended.yaml', { type: 'text/yaml' })
+        const file = new File([blob], 'example_rules_extended_new.yaml', { type: 'text/yaml' })
         return file
       } catch (err) {
         console.error('Не удалось загрузить стандартные правила', err)
@@ -181,13 +177,6 @@ export default {
       this.$refs.logs.textContent = `[ERROR] ${err.message}`
     }
   },
-
-  // checkReady() {
-  //   if (this.pdfFile && this.yamlFile) {
-  //     // Автоматически отправляем (или можно добавить кнопку)
-  //     this.submitFiles()
-  //   }
-  // }
   }
 }
 </script>
@@ -291,7 +280,7 @@ export default {
   text-align: left; 
 }
 .log-line {
-  display: flex;          /* Включаем flex-распределение */
+  display: flex;
   margin-bottom: 4px;
   font-family: 'Courier New', monospace;
   white-space: pre-wrap;
@@ -299,32 +288,32 @@ export default {
 
 .log-prefix {
   display: inline-block;
-  min-width: 85px;       /* Фиксированная ширина под самый длинный префикс */
-  text-align: left;      /* Выравниваем префиксы по левому краю */
-  padding-right: 8px;    /* Отступ перед текстом */
+  min-width: 85px;
+  text-align: left;
+  padding-right: 8px;
 }
 
 .log-content {
-  flex: 1;               /* Занимает всё оставшееся пространство */
+  flex: 1;
   color: #000000;
 }
 
 .log-error {
-  color: #dc2626; /* Ярко-красный */
+  color: #dc2626;
   font-weight: 600;
 }
 
 .log-warn {
-  color: #f59e0b; /* Оранжевый */
+  color: #f59e0b;
   font-weight: 600;
 }
 
 .log-info {
-  color: #3b82f6; /* Синий */
+  color: #3b82f6;
 }
 
 .log-success {
-  color: #10b981; /* Ярко-зелёный */
+  color: #10b981;
   font-weight: 600;
 }
 

@@ -18,7 +18,7 @@ class SlideNumbersPresentationCheck(PresentationCheck):
         total_slides = len(presentation.slides)
         slides_with_numbers_count = len(slides_with_numbers)
         
-        min_coverage = self.params.get('min_coverage', default = 1)
+        min_coverage = self.params.get('min_coverage', 1)
         actual_coverage = slides_with_numbers_count / total_slides if total_slides > 0 else 0
         
         if actual_coverage < min_coverage:

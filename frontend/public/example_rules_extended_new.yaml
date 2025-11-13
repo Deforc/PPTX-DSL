@@ -1,0 +1,277 @@
+# Расширенный пример правил валидации презентаций
+# Демонстрирует все реализованные проверки
+
+rules:
+  # === ПРОВЕРКИ УРОВНЯ PRESENTATION ===
+  
+  - rule:
+      name: "Оптимальное количество слайдов"
+      check: slides_count
+      level: presentation
+      params:
+        min: 5
+        max: 30
+      severity: error
+
+  - rule:
+      name: "Ограничение количества шрифтов в презентации"
+      check: font_count
+      level: presentation
+      params:
+        max: 3
+      severity: warning
+
+  - rule:
+      name: "Ограничение размеров шрифтов в презентации"
+      check: font_sizes_count
+      level: presentation
+      params:
+        max: 5
+      severity: warning
+
+  - rule:
+      name: "Минимальный размер шрифта"
+      check: font_min_size
+      level: presentation
+      params:
+        min: 14
+        unit: pt
+      severity: error
+
+  - rule:
+      name: "Контроль заглавных букв в презентации"
+      check: uppercase_percent
+      level: presentation
+      params:
+        max: 30
+      severity: warning
+
+  - rule:
+      name: "Единый тип списков в презентации"
+      check: list_consistency
+      level: presentation
+      params:
+        same_type: true
+      severity: info
+
+  - rule:
+      name: "Наличие и последовательность номеров слайдов"
+      check: slide_numbers
+      level: presentation
+      params:
+        min_coverage: 0.9
+        max_gap: 3
+      severity: warning
+
+  - rule:
+      name: "Заголовок обязателен на каждом слайде"
+      check: heading_presence
+      scope: all
+      params:
+        required: true
+      severity: error
+
+  - rule:
+      name: "Ограничение элементов на слайде"
+      check: elements_count
+      scope: all
+      params:
+        max: 8
+      severity: warning
+
+  - rule:
+      name: "Контроль плотности текста"
+      check: text_density
+      scope: all
+      params:
+        max_total_chars: 1000
+        max_blocks: 10
+      severity: warning
+
+  - rule:
+      name: "Не более 2 шрифтов на слайде"
+      check: font_count
+      level: slide
+      scope: all
+      params:
+        max: 2
+      severity: warning
+
+  - rule:
+      name: "Ограничение размеров на слайде"
+      check: font_sizes_count
+      level: slide
+      scope: all
+      params:
+        max: 4
+      severity: warning
+
+  - rule:
+      name: "Минимальный шрифт на слайде"
+      check: font_min_size
+      level: slide
+      scope: all
+      params:
+        min: 12
+        unit: pt
+      severity: error
+
+  - rule:
+      name: "Контроль CAPS на слайде"
+      check: uppercase_percent
+      level: slide
+      scope: all
+      params:
+        max: 40
+      severity: warning
+
+  - rule:
+      name: "Проверка орфографии"
+      check: spelling
+      scope: all
+      params:
+        enabled: true
+      severity: error
+
+  - rule:
+      name: "Предложения не должны быть слишком длинными"
+      check: sentence_length
+      scope: all
+      params:
+        max: 20
+        unit: words
+      severity: warning
+
+  - rule:
+      name: "Контроль длины фраз"
+      check: long_phrases
+      scope: all
+      params:
+        max_length: 100
+      severity: info
+
+  - rule:
+      name: "Контроль длины абзацев"
+      check: paragraph_length
+      scope: all
+      params:
+        max_length: 300
+        min_length: 10
+      severity: warning
+
+  - rule:
+      name: "Количество предложений в абзаце"
+      check: sentence_count
+      scope: all
+      params:
+        max_sentences: 4
+        min_sentences: 1
+      severity: info
+
+  - rule:
+      name: "Проверка заглавных букв в начале"
+      check: capitalization
+      scope: all
+      params:
+        check_titles: true
+        check_sentences: true
+      severity: warning
+
+  - rule:
+      name: "Ограничение вложенности списков"
+      check: list_nesting
+      scope: all
+      params:
+        max_level: 2
+      severity: warning
+
+  - rule:
+      name: "Контроль глубины вложенности"
+      check: nested_lists_depth
+      scope: all
+      params:
+        max_depth: 2
+        check_bullet: true
+        check_numbered: true
+      severity: warning
+
+  - rule:
+      name: "Оптимальное количество пунктов в списке"
+      check: list_items_count
+      scope: all
+      params:
+        min_items: 2
+        max_items: 7
+        check_bullet: true
+        check_numbered: true
+        check_nested: false
+      severity: warning
+
+  - rule:
+      name: "Запрет на смешивание типов списков"
+      check: mixed_lists
+      scope: all
+      params:
+        allow_mixed: false
+      severity: warning
+
+  - rule:
+      name: "Единый тип списков на слайде"
+      check: list_consistency
+      level: slide
+      scope: all
+      params:
+        same_type: true
+      severity: info
+
+  - rule:
+      name: "Согласованность пунктов списка"
+      check: bullet_consistency
+      scope: all
+      params:
+        check_parallelism: true
+        check_punctuation: true
+      severity: info
+
+  - rule:
+      name: "Номера на основных слайдах"
+      check: slide_numbers
+      level: slide
+      scope: [2, 3, 4, 5]
+      params:
+        required: true
+      severity: warning
+
+  - rule:
+      name: "Титульный слайд: заголовок опционален"
+      check: heading_presence
+      scope: 1
+      params:
+        required: false
+      severity: info
+
+  - rule:
+      name: "Последний слайд: минимум текста"
+      check: text_density
+      scope: [30]
+      params:
+        max_total_chars: 200
+        max_blocks: 3
+      severity: info
+
+  - rule:
+      name: "Строгая проверка орфографии на ключевых слайдах"
+      check: spelling
+      scope: [2, 3, 4, 5]
+      params:
+        enabled: true
+      severity: error
+
+  - rule:
+      name: "Средние слайды: контроль плотности"
+      check: text_density
+      scope: ["10-20"]
+      params:
+        max_total_chars: 800
+        max_blocks: 8
+      severity: warning
