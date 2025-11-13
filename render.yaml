@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: pptx-validator-api
+    runtime: python
+
+    directory: ./
+
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
+
+    envVars:
+      - key: PORT
+        sync: false
+      - key: ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: https://pptx-dsl.vercel.app,http://localhost:5173
+      - key: API_V1_PREFIX
+        value: /api/v1
+      - key: UPLOAD_DIR
+        value: storage/uploads
+      - key: MAX_PDF_MB
+        value: 25
+      - key: MAX_RULES_MB
+        value: 2
+      - key: REQUEST_BODY_LIMIT_MB
+        value: 30
+        
+    plan: free
