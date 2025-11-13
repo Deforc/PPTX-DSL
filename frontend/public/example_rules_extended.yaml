@@ -1,0 +1,163 @@
+rules:
+  # === ПРОВЕРКИ УРОВНЯ PRESENTATION ===
+  
+  - rule:
+      name: "Количество слайдов от 5 до 30"
+      check: slides_count
+      params:
+        min: 5
+        max: 30
+      severity: error
+
+  - rule:
+      name: "Максимум 3 шрифта в презентации"
+      level: presentation
+      check: font_count
+      params:
+        max: 3
+      severity: error
+
+  - rule:
+      name: "Максимум 5 размеров шрифтов в презентации"
+      level: presentation
+      check: font_sizes_count
+      params:
+        max: 5
+      severity: warning
+
+  - rule:
+      name: "Номера страниц обязательны и последовательны"
+      check: page_numbers
+      params:
+        required: true
+        sequential: true
+      severity: error
+
+  - rule:
+      name: "Максимум 5000 слов в презентации"
+      level: presentation
+      check: text_count
+      params:
+        max: 5000
+        unit: words
+      severity: warning
+
+  - rule:
+      name: "Все списки одного типа"
+      level: presentation
+      check: list_consistency
+      params:
+        same_type: true
+      severity: info
+
+  - rule:
+      name: "Минимальный размер шрифта 14pt"
+      level: presentation
+      check: font_min_size
+      params:
+        min: 14
+        unit: pt
+      severity: warning
+
+  - rule:
+      name: "Максимум 20% заглавных букв в презентации"
+      level: presentation
+      check: uppercase_percent
+      params:
+        max: 20
+      severity: warning
+
+  # === ПРОВЕРКИ УРОВНЯ SLIDE ===
+
+  - rule:
+      name: "Заголовки обязательны на всех слайдах"
+      check: heading_presence
+      params:
+        required: true
+      severity: warning
+
+  - rule:
+      name: "Максимум 2 шрифта на слайде"
+      level: slide
+      scope: all
+      check: font_count
+      params:
+        max: 2
+      severity: warning
+
+  - rule:
+      name: "Максимум 3 размера шрифтов на слайде"
+      level: slide
+      scope: all
+      check: font_sizes_count
+      params:
+        max: 3
+      severity: info
+
+  - rule:
+      name: "Максимум 300 слов на слайде"
+      level: slide
+      scope: all
+      check: text_count
+      params:
+        max: 300
+        unit: words
+      severity: warning
+
+  - rule:
+      name: "Предложения не длиннее 20 слов"
+      check: sentence_length
+      params:
+        max: 20
+        unit: words
+      severity: info
+
+  - rule:
+      name: "Максимум 7 пунктов в списке"
+      check: list_items_count
+      params:
+        max: 7
+      severity: warning
+
+  - rule:
+      name: "Максимум 2 уровня вложенности списков"
+      check: list_nesting
+      params:
+        max_level: 2
+      severity: info
+
+  - rule:
+      name: "Единообразие списков на слайде"
+      level: slide
+      scope: all
+      check: list_consistency
+      params:
+        same_type: true
+      severity: info
+
+  - rule:
+      name: "Минимальный размер шрифта 18pt на слайдах с контентом"
+      level: slide
+      scope: 2-10
+      check: font_min_size
+      params:
+        min: 18
+        unit: pt
+      severity: error
+
+  - rule:
+      name: "Максимум 30% заглавных букв на слайде"
+      level: slide
+      scope: all
+      check: uppercase_percent
+      params:
+        max: 30
+      severity: warning
+
+  - rule:
+      name: "Максимум 8 элементов на слайде"
+      check: elements_count
+      params:
+        max: 8
+      severity: warning
+

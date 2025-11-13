@@ -26,14 +26,15 @@
       {{ statusText }}
     </div>
 
-    <div class="logs-container">
-      <h3>Логи валидации:</h3>
-      <pre class="logs" ref="logs">
-[WARN] Слайд 1: используется 4 шрифта (рекомендуется не более 3)
-[ERROR] Слайд 3: цвет текста слишком бледный (контраст ниже нормы)
-[INFO] Проверка завершена. Найдено 1 предупреждение, 1 ошибка.
-      </pre>
+  <div class="logs-container">
+    <h3>Логи валидации:</h3>
+    <div class="logs">
+      <div v-for="(line, index) in logLines" :key="index" class="log-line">
+        <span class="log-prefix" :class="getLogPrefixClass(line)">{{ splitLogLine(line)[0] }}</span>
+        <span class="log-content">{{ splitLogLine(line)[1] }}</span>
+      </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -45,12 +46,13 @@ export default {
       pdfFile: null,
       yamlFile: null,
       status: '',
-      statusText: 'Ожидание файлов...'
+      statusText: 'Ожидание файлов...',
+      logLines: []
     }
   },
   computed: {
     areFilesReady() {
-      return this.pdfFile && this.yamlFile
+      return !!this.pdfFile
     }
   },
   methods: {
@@ -92,18 +94,60 @@ export default {
         // this.checkReady()
       }
     },
+    getLogPrefixClass(line) {
+      if (line.startsWith('[ERROR]')) return 'log-error';
+      if (line.startsWith('[WARNING]')) return 'log-warn';
+      if (line.startsWith('[INFO]')) return 'log-info';
+      if (line.startsWith('[SUCCESS]')) return 'log-success';
+      return '';
+    },
+    
+    splitLogLine(line) {
+      const match = line.match(/^(\[[A-Z]+\]\s*)(.*)/);
+      return match ? [match[1], match[2]] : ['', line];
+    },
+
+    async loadDefaultYaml() {
+      try {
+        const response = await fetch('/example_rules_extended.yaml')
+        const blob = await response.blob()
+        const file = new File([blob], 'example_rules_extended.yaml', { type: 'text/yaml' })
+        return file
+      } catch (err) {
+        console.error('Не удалось загрузить стандартные правила', err)
+        throw new Error('Не удалось загрузить стандартные правила')
+      }
+    },
+
     async submitFiles() {
-    if (!this.pdfFile || !this.yamlFile) {
-      alert('Загрузите оба файла')
+    if (!this.pdfFile) {
+      alert('Загрузите PDF-файл')
       return
     }
 
     const formData = new FormData()
     formData.append('pdf_file', this.pdfFile)
-    formData.append('yaml_file', this.yamlFile)
+
+    let yamlToSend = null
+
+    if (this.yamlFile) {
+      yamlToSend = this.yamlFile
+    } else {
+      try {
+        yamlToSend = await this.loadDefaultYaml()
+      } catch (err) {
+        this.statusText = 'Ошибка загрузки правил'
+        this.status = 'error'
+        this.logLines = [err.message]
+        return
+      }
+    }
+
+    formData.append('yaml_file', yamlToSend)
 
     this.status = ''
     this.statusText = 'Проверка...'
+    this.logLines = []
 
     try {
       const response = await fetch('http://localhost:8000/api/v1/validate', {
@@ -118,7 +162,7 @@ export default {
             ? 'Проверено. Есть ошибки' 
             : 'Проверено. Ошибок нет'
           this.status = result.status === 'failed' ? 'error' : 'ok'
-          this.$refs.logs.textContent = result.validation.logs.join('\n')
+          this.logLines = result.validation.logs 
         } else {
           this.statusText = result.logs ? 'Проверено. Есть ошибки' : 'Неизвестный формат ответа'
           this.status = 'error'
@@ -242,11 +286,48 @@ export default {
   overflow-y: auto;
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  color: #2d3748;
   box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.12);
-  white-space: pre-wrap;
   line-height: 1.6;
+  text-align: left; 
 }
+.log-line {
+  display: flex;          /* Включаем flex-распределение */
+  margin-bottom: 4px;
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+}
+
+.log-prefix {
+  display: inline-block;
+  min-width: 85px;       /* Фиксированная ширина под самый длинный префикс */
+  text-align: left;      /* Выравниваем префиксы по левому краю */
+  padding-right: 8px;    /* Отступ перед текстом */
+}
+
+.log-content {
+  flex: 1;               /* Занимает всё оставшееся пространство */
+  color: #000000;
+}
+
+.log-error {
+  color: #dc2626; /* Ярко-красный */
+  font-weight: 600;
+}
+
+.log-warn {
+  color: #f59e0b; /* Оранжевый */
+  font-weight: 600;
+}
+
+.log-info {
+  color: #3b82f6; /* Синий */
+}
+
+.log-success {
+  color: #10b981; /* Ярко-зелёный */
+  font-weight: 600;
+}
+
 .validate-btn {
   display: block;
   margin: 20px auto;
