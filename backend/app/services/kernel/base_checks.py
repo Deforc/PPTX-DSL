@@ -3,7 +3,6 @@ from typing import Dict, Any, Union, List, Set
 from app.domain.entities import Presentation, Slide
 from app.services.kernel.validation_result import ValidationResult
 
-
 class PresentationCheck(ABC):
     def __init__(self, rule_name: str, params: Dict[str, Any], severity: str):
         self.rule_name = rule_name
@@ -13,7 +12,6 @@ class PresentationCheck(ABC):
     @abstractmethod
     def validate(self, presentation: Presentation) -> ValidationResult:
         pass
-
 
 class SlideCheck(ABC):
     def __init__(self, rule_name: str, params: Dict[str, Any], severity: str, scope: Union[str, List[int]]):
@@ -28,4 +26,3 @@ class SlideCheck(ABC):
     @abstractmethod
     def validate(self, slide: Slide) -> ValidationResult:
         pass
-

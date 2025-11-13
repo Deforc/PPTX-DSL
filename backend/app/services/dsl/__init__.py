@@ -1,7 +1,3 @@
-"""
-Модуль для работы с DSL валидации презентаций
-"""
-
 from app.services.dsl.yaml_parser import (
     DSLParser,
     DSLParseError,
@@ -15,4 +11,3 @@ __all__ = [
     'load_validation_engine',
     'load_validation_engine_from_string'
 ]
-

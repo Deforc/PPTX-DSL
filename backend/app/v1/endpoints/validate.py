@@ -10,9 +10,6 @@ async def validate_presentation(
     pdf_file: UploadFile = File(..., description="PDF-файл презентации"),
     yaml_file: UploadFile = File(..., description="YAML-файл с правилами DSL")
 ) -> JSONResponse:
-    """
-    Валидация PDF презентации по правилам из YAML файла
-    """
     if not pdf_file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Файл презентации должен быть в формате PDF")
     

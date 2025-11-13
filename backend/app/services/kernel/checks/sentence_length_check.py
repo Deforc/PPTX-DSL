@@ -4,17 +4,14 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Slide
 from typing import Dict, Any, List
 
-
 class SentenceLengthCheck(SlideCheck):
-    """Проверка длины предложений на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         max_length = self.params.get('max')
-        unit = self.params.get('unit', 'words')  # words или characters
+        unit = self.params.get('unit', 'words')
         
         slide_text = ' '.join(block.text for block in slide.blocks)
         
-        # Разбиваем текст на предложения (по точкам, восклицательным и вопросительным знакам)
         sentences = re.split(r'[.!?]+', slide_text)
         sentences = [s.strip() for s in sentences if s.strip()]
         
@@ -32,7 +29,7 @@ class SentenceLengthCheck(SlideCheck):
             if unit == 'words':
                 length = len(sentence.split())
                 unit_name = "слов"
-            else:  # characters
+            else:
                 length = len(sentence)
                 unit_name = "символов"
             
@@ -56,4 +53,3 @@ class SentenceLengthCheck(SlideCheck):
             rule_name=self.rule_name,
             message=f"Слайд {slide.page_number}: все предложения в пределах нормы"
         )
-

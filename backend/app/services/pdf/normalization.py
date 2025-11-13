@@ -3,10 +3,8 @@ from typing import List, Dict
 from app.domain.entities import TextRun
 
 class TextNormalizer:
-    """Сервис для нормализации текста и очистки шрифтов"""
     
     def normalize_symbols(self, raw_chars: List[Dict]) -> List[TextRun]:
-        """Преобразует сырые символы в TextRun с очищенными шрифтами"""
         if not raw_chars:
             return []
         
@@ -34,7 +32,6 @@ class TextNormalizer:
         return text_runs
     
     def _normalize_char(self, char: Dict) -> Dict:
-        """Нормализует отдельный символ"""
         font_name = char.get('fontname', 'Unknown')
         text = char.get('text', '')
         
@@ -60,7 +57,6 @@ class TextNormalizer:
         }
     
     def _clean_font_name(self, font_name: str) -> tuple:
-        """Очищает имя шрифта и определяет стиль"""
         if '+' in font_name:
             font_name = font_name.split('+')[-1]
         
@@ -84,7 +80,6 @@ class TextNormalizer:
         return font_family, is_bold, is_italic
     
     def _split_merged_font_name(self, font_name: str) -> str:
-        """Разделяет слитные имена шрифтов"""
         if not font_name or font_name[0].islower():
             return font_name
         

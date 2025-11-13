@@ -4,10 +4,8 @@ from app.domain.entities import Presentation, Slide
 from typing import List, Optional, Union
 
 class SlideNumbersPresentationCheck(PresentationCheck):
-    """Проверка наличия и корректности номеров слайдов в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
-        """Проверяет общее наличие и корректность номеров слайдов в презентации"""
         slides_with_numbers = []
         slides_without_numbers = []
         
@@ -57,7 +55,6 @@ class SlideNumbersPresentationCheck(PresentationCheck):
         )
     
     def _check_number_sequence(self, numbered_slide_indices: List[int], all_slides: List[Slide]) -> Optional[str]:
-        """Проверяет корректность последовательности номеров слайдов"""
         if len(numbered_slide_indices) < 2:
             return None  
         actual_numbers = []
@@ -86,7 +83,6 @@ class SlideNumbersPresentationCheck(PresentationCheck):
         return "; ".join(issues) if issues else None
     
     def _check_arabic_sequence(self, numbers: List[tuple]) -> Optional[str]:
-        """Проверяет последовательность арабских цифр"""
         slide_nums = [item[0] for item in numbers]
         page_nums = [item[1] for item in numbers]
         
@@ -102,7 +98,6 @@ class SlideNumbersPresentationCheck(PresentationCheck):
         return None
      
     def _parse_page_number(self, page_number_text: str) -> Optional[Union[int, str]]:
-        """Парсит текст номера страницы в число или римскую цифру"""
         import re
         
         text = page_number_text.strip()
@@ -121,13 +116,9 @@ class SlideNumbersPresentationCheck(PresentationCheck):
         
         return None
     
-    
-
 class SlideNumbersSlideCheck(SlideCheck):
-    """Проверка наличия номера на конкретном слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет наличие и корректность номера на конкретном слайде"""
         required = self.params.get('required', True)
         
         if not required:
@@ -173,7 +164,6 @@ class SlideNumbersSlideCheck(SlideCheck):
         )
     
     def _parse_page_number(self, page_number_text: str) -> Optional[Union[int, str]]:
-        """Парсит текст номера страницы"""
         import re
         
         text = page_number_text.strip()
@@ -193,7 +183,6 @@ class SlideNumbersSlideCheck(SlideCheck):
         return None
     
     def _check_position(self, slide: Slide) -> bool:
-        """Проверяет, что номер находится в стандартной позиции"""
         if not slide.page_number_position:
             return False
         

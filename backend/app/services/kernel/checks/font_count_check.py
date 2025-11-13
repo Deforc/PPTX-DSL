@@ -3,9 +3,7 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation, Slide
 from typing import Dict, Any, Union, List
 
-
 class FontCountPresentationCheck(PresentationCheck):
-    """Проверка количества различных шрифтов в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
         fonts = set()
@@ -33,9 +31,7 @@ class FontCountPresentationCheck(PresentationCheck):
             message=f"Количество шрифтов {font_count} в допустимых пределах"
         )
 
-
 class FontCountSlideCheck(SlideCheck):
-    """Проверка количества различных шрифтов на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         fonts = set()

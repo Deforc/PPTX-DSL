@@ -3,9 +3,7 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation, Slide
 from typing import Dict, Any
 
-
 class UppercasePercentPresentationCheck(PresentationCheck):
-    """Проверка процента заглавных букв в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
         max_percent = self.params.get('max')
@@ -28,7 +26,6 @@ class UppercasePercentPresentationCheck(PresentationCheck):
                 message="Нет текста для проверки"
             )
         
-        # Считаем только буквы
         letters = [c for c in all_text if c.isalpha()]
         if not letters:
             return ValidationResult(
@@ -56,9 +53,7 @@ class UppercasePercentPresentationCheck(PresentationCheck):
             message=f"Процент заглавных букв {percent:.1f}% в норме"
         )
 
-
 class UppercasePercentSlideCheck(SlideCheck):
-    """Проверка процента заглавных букв на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         max_percent = self.params.get('max')
@@ -81,7 +76,6 @@ class UppercasePercentSlideCheck(SlideCheck):
                 message=f"Слайд {slide.page_number}: нет текста для проверки"
             )
         
-        # Считаем только буквы
         letters = [c for c in slide_text if c.isalpha()]
         if not letters:
             return ValidationResult(
@@ -108,4 +102,3 @@ class UppercasePercentSlideCheck(SlideCheck):
             rule_name=self.rule_name,
             message=f"Слайд {slide.page_number}: процент заглавных букв {percent:.1f}% в норме"
         )
-

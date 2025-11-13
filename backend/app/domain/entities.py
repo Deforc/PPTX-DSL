@@ -22,7 +22,6 @@ class PageNumberPosition(Enum):
 
 @dataclass
 class TextRun:
-    """Фрагмент текста с одинаковым форматированием"""
     text: str
     font_family: Optional[str] = None
     font_size: Optional[float] = None
@@ -32,7 +31,6 @@ class TextRun:
 
 @dataclass  
 class Paragraph:
-    """Абзац текста"""
     text: str
     runs: List[TextRun]
     list_type: ListType = ListType.NONE
@@ -43,7 +41,6 @@ class Paragraph:
 
 @dataclass
 class Slide:
-    """Слайд (страница PDF)"""
     page_number: int
     width: float
     height: float
@@ -55,26 +52,22 @@ class Slide:
 
 @dataclass
 class Presentation:
-    """Презентация (PDF документ)"""
     file_path: Path
     slides: List[Slide]
     metadata: Dict[str, Any] = field(default_factory=dict)
     fonts_used: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
-        """Post-init обработка для Presentation"""
         if isinstance(self.file_path, str):
             self.file_path = Path(self.file_path)
 
     def get_slide_by_number(self, number: int) -> Optional[Slide]:
-        """Получить слайд по номеру"""
         for slide in self.slides:
             if slide.page_number == number:
                 return slide
         return None
 
     def get_all_text(self) -> str:
-        """Получить весь текст презентации"""
         all_text = []
         for slide in self.slides:
             for block in slide.blocks:  
@@ -82,7 +75,6 @@ class Presentation:
         return "\n".join(all_text)
 
     def get_all_lists(self) -> List[Paragraph]:
-        """Получить все списки из презентации"""
         all_lists = []
         for slide in self.slides:
             for block in slide.blocks:  

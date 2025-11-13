@@ -1,7 +1,3 @@
-"""
-Модуль проверок презентаций
-"""
-
 from app.services.kernel.checks.slides_count_check import SlidesCountCheck
 from app.services.kernel.checks.font_count_check import (
     FontCountPresentationCheck,
@@ -27,9 +23,9 @@ from app.services.kernel.checks.uppercase_percent_check import (
     UppercasePercentSlideCheck
 )
 from app.services.kernel.checks.elements_count_check import ElementsCountCheck
+from app.services.kernel.checks.spelling_check import SpellingCheck
 
 __all__ = [
-    # Presentation checks
     'SlidesCountCheck',
     'FontCountPresentationCheck',
     'FontSizesCountPresentationCheck',
@@ -37,7 +33,6 @@ __all__ = [
     'FontMinSizePresentationCheck',
     'UppercasePercentPresentationCheck',
     
-    # Slide checks
     'FontCountSlideCheck',
     'HeadingPresenceCheck',
     'FontSizesCountSlideCheck',
@@ -47,5 +42,5 @@ __all__ = [
     'FontMinSizeSlideCheck',
     'UppercasePercentSlideCheck',
     'ElementsCountCheck',
+    'SpellingCheck',
 ]
-

@@ -3,9 +3,7 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation
 from typing import Dict, Any
 
-
 class SlidesCountCheck(PresentationCheck):
-    """Проверка количества слайдов в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
         slides_count = len(presentation.slides)

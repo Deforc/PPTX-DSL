@@ -3,14 +3,12 @@ import re
 from app.domain.entities import ListType, TextRun, Paragraph
 
 class LayoutAnalyzer:
-    """Сервис для группировки текста в блоки и анализа layout"""
     
     def __init__(self, word_threshold: float = 1.0, line_threshold: float = 1.5):
         self.word_threshold = word_threshold
         self.line_threshold = line_threshold
     
     def build_paragraphs(self, text_runs: List[TextRun], page_width: float, page_height: float) -> List[Paragraph]:
-        """Группирует TextRun в ParagraphBlock"""
         if not text_runs:
             return []
         
@@ -23,7 +21,6 @@ class LayoutAnalyzer:
         return paragraphs
     
     def _group_to_lines(self, runs: List[TextRun]) -> List[List[TextRun]]:
-        """Группирует TextRun в строки по вертикальной близости"""
         if not runs:
             return []
         
@@ -51,7 +48,6 @@ class LayoutAnalyzer:
         return lines
     
     def _group_to_paragraphs(self, lines: List[List[TextRun]]) -> List[Paragraph]:
-        """Группирует строки в абзацы"""
         if not lines:
             return []
         
@@ -84,7 +80,6 @@ class LayoutAnalyzer:
         return paragraphs
     
     def _create_paragraph(self, lines: List[List[TextRun]]) -> Paragraph:
-        """Создает ParagraphBlock из линий"""
         all_runs = [run for line in lines for run in line]
         
         x0 = min(run.bbox[0] for run in all_runs)
@@ -101,7 +96,6 @@ class LayoutAnalyzer:
         )
     
     def _detect_lists(self, paragraphs: List[Paragraph]) -> List[Paragraph]:
-        """Определяет списки в параграфах"""
         for paragraph in paragraphs:
             list_type, list_prefix, clean_text = self._detect_list_type(paragraph.text)
             
@@ -115,7 +109,6 @@ class LayoutAnalyzer:
         return paragraphs
     
     def _detect_list_type(self, text: str) -> Tuple[ListType, str, str]:
-        """Определяет тип списка"""
         stripped = text.lstrip()
         if not stripped:
             return ListType.NONE, "", text
@@ -127,9 +120,9 @@ class LayoutAnalyzer:
             return ListType.BULLET, prefix, clean_text
         
         numbered_patterns = [
-            r'^\d+\.',      # 1.
-            r'^\d+\)',      # 1)
-            r'^\(\d+\)',    # (1)
+            r'^\d+\.',
+            r'^\d+\)',
+            r'^\(\d+\)',
         ]
         
         for pattern in numbered_patterns:
@@ -142,7 +135,6 @@ class LayoutAnalyzer:
         return ListType.NONE, "", text.strip()
     
     def _detect_indentation_level(self, x_coord: float) -> int:
-        """Определяет уровень вложенности по X-координате"""
         if x_coord >= 100:
             return 2
         elif x_coord >= 50:
@@ -151,7 +143,6 @@ class LayoutAnalyzer:
             return 0
     
     def _extract_list_number(self, prefix: str, list_type: ListType) -> Optional[int]:
-        """Извлекает номер из префикса списка"""
         if list_type != ListType.NUMBERED:
             return None
         

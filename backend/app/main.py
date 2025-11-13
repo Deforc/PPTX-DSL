@@ -5,7 +5,6 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.services.pdf.pdf_processing import PdfProcessingService
@@ -24,7 +23,6 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
     )
 
-    # CORS
     app.add_middleware(
         CORSMiddleware,
         allow_origins=s.CORS_ORIGINS,
@@ -33,11 +31,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Гарантируем наличие директории загрузок
     upload_dir: Path = s.upload_path
     os.makedirs(upload_dir, exist_ok=True)
 
-    # Роуты v1
     app.include_router(router, prefix=s.API_V1_PREFIX)
     return app
 

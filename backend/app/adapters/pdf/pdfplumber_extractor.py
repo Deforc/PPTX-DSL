@@ -6,7 +6,6 @@ from app.domain.entities import Presentation, Slide
 from app.domain.errors import ExtractionError
 
 class PdfPlumberExtractor(PdfExtractor):
-    """Реализация PdfExtractor через PDFPlumber"""
     
     def extract(self, file_path: Path) -> Presentation:
         try:
@@ -17,10 +16,8 @@ class PdfPlumberExtractor(PdfExtractor):
             all_fonts = {}
             
             with pdfplumber.open(file_path) as pdf:
-                # Извлекаем шрифты
                 all_fonts = self._extract_fonts_from_pdf(pdf)
                 
-                # Парсим каждую страницу
                 for page_num, page in enumerate(pdf.pages):
                     slide = self._parse_page(page, page_num + 1)
                     slides.append(slide)
@@ -38,7 +35,6 @@ class PdfPlumberExtractor(PdfExtractor):
             raise ExtractionError(f"Ошибка извлечения из PDF: {str(e)}") from e
     
     def _parse_page(self, page: pdfplumber.page.Page, page_num: int) -> Slide:
-        """Парсит страницу PDF в сырую модель Slide"""
         chars = page.chars
         width = page.width
         height = page.height
@@ -47,12 +43,11 @@ class PdfPlumberExtractor(PdfExtractor):
             page_number=page_num,
             width=width,
             height=height,
-            blocks=[],  # Блоки будут заполнены на этапе нормализации
+            blocks=[],
             raw_chars=chars
         )
     
     def _extract_fonts_from_pdf(self, pdf) -> Dict[str, Any]:
-        """Извлекает информацию о шрифтах из PDF"""
         fonts_info = {}
         
         for page_num, page in enumerate(pdf.pages):

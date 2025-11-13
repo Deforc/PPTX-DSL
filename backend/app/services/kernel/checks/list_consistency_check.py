@@ -3,9 +3,7 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation, Slide, ListType
 from typing import Dict, Any, Set
 
-
 class ListConsistencyPresentationCheck(PresentationCheck):
-    """Проверка единообразия использования списков в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
         same_type = self.params.get('same_type', True)
@@ -18,7 +16,6 @@ class ListConsistencyPresentationCheck(PresentationCheck):
                 message="Проверка единообразия списков отключена"
             )
         
-        # Собираем все типы списков
         list_types: Set[ListType] = set()
         for slide in presentation.slides:
             for block in slide.blocks:
@@ -49,9 +46,7 @@ class ListConsistencyPresentationCheck(PresentationCheck):
             message=f"Все списки одного типа: {list(list_types)[0].value}"
         )
 
-
 class ListConsistencySlideCheck(SlideCheck):
-    """Проверка единообразия использования списков на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         same_type = self.params.get('same_type', True)
@@ -64,7 +59,6 @@ class ListConsistencySlideCheck(SlideCheck):
                 message=f"Слайд {slide.page_number}: проверка единообразия списков отключена"
             )
         
-        # Собираем все типы списков на слайде
         list_types: Set[ListType] = set()
         for block in slide.blocks:
             if block.list_type != ListType.NONE:
@@ -93,4 +87,3 @@ class ListConsistencySlideCheck(SlideCheck):
             rule_name=self.rule_name,
             message=f"Слайд {slide.page_number}: все списки одного типа"
         )
-

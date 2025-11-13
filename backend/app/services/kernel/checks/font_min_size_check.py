@@ -3,13 +3,11 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation, Slide
 from typing import Dict, Any, List
 
-
 class FontMinSizePresentationCheck(PresentationCheck):
-    """Проверка минимального размера шрифта в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
         min_size = self.params.get('min')
-        unit = self.params.get('unit', 'pt')  # pt или px
+        unit = self.params.get('unit', 'pt')
         
         if min_size is None:
             return ValidationResult(
@@ -19,7 +17,6 @@ class FontMinSizePresentationCheck(PresentationCheck):
                 message="Минимальный размер шрифта не указан"
             )
         
-        # Собираем все размеры шрифтов
         small_fonts = []
         for slide in presentation.slides:
             for block in slide.blocks:
@@ -44,13 +41,11 @@ class FontMinSizePresentationCheck(PresentationCheck):
             message=f"Все шрифты не меньше {min_size}{unit}"
         )
 
-
 class FontMinSizeSlideCheck(SlideCheck):
-    """Проверка минимального размера шрифта на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         min_size = self.params.get('min')
-        unit = self.params.get('unit', 'pt')  # pt или px
+        unit = self.params.get('unit', 'pt')
         
         if min_size is None:
             return ValidationResult(
@@ -60,7 +55,6 @@ class FontMinSizeSlideCheck(SlideCheck):
                 message=f"Слайд {slide.page_number}: минимальный размер шрифта не указан"
             )
         
-        # Собираем маленькие шрифты
         small_fonts = []
         for block in slide.blocks:
             for run in block.runs:
@@ -82,4 +76,3 @@ class FontMinSizeSlideCheck(SlideCheck):
             rule_name=self.rule_name,
             message=f"Слайд {slide.page_number}: все шрифты не меньше {min_size}{unit}"
         )
-

@@ -5,7 +5,6 @@ import re
 class ListDetection:
 
     def _detect_lists(self, paragraphs: List[Paragraph]) -> List[Paragraph]:
-        """Определяет списки в параграфах"""
         for paragraph in paragraphs:
             list_type, list_prefix, clean_text = self._detect_list_type(paragraph.text)
             
@@ -19,23 +18,20 @@ class ListDetection:
         return paragraphs
     
     def _detect_list_type(self, text: str) -> Tuple[ListType, str, str]:
-        """Определяет тип списка"""
         stripped = text.lstrip()
         if not stripped:
             return ListType.NONE, "", text
         
-        # Bullet символы
         bullet_symbols = ['•', '·', '∙', '◦', '-', '—', '*', '+', '‣']
         if any(stripped.startswith(sym) for sym in bullet_symbols):
             prefix = stripped[0]
             clean_text = stripped[1:].strip()
             return ListType.BULLET, prefix, clean_text
         
-        # Нумерованные списки
         numbered_patterns = [
-            r'^\d+\.',      # 1.
-            r'^\d+\)',      # 1)
-            r'^\(\d+\)',    # (1)
+            r'^\d+\.',
+            r'^\d+\)',
+            r'^\(\d+\)',
         ]
         
         for pattern in numbered_patterns:
@@ -48,7 +44,6 @@ class ListDetection:
         return ListType.NONE, "", text.strip()
     
     def _detect_indentation_level(self, x_coord: float) -> int:
-        """Определяет уровень вложенности по X-координате"""
         if x_coord >= 100:
             return 2
         elif x_coord >= 50:
@@ -57,7 +52,6 @@ class ListDetection:
             return 0
     
     def _extract_list_number(self, prefix: str, list_type: ListType) -> Optional[int]:
-        """Извлекает номер из префикса списка"""
         if list_type != ListType.NUMBERED:
             return None
         
@@ -69,6 +63,3 @@ class ListDetection:
             pass
         
         return None
-
-
-    

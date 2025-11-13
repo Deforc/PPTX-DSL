@@ -4,10 +4,8 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Slide, Paragraph, ListType
 
 class ListItemsCountCheck(SlideCheck):
-    """Проверка количества пунктов в маркированных и нумерованных списках"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет что списки содержат разумное количество пунктов"""
         min_items = self.params.get('min_items', 1)      
         max_items = self.params.get('max_items', 8)      
         check_bullet = self.params.get('check_bullet', True)
@@ -55,7 +53,6 @@ class ListItemsCountCheck(SlideCheck):
         )
     
     def _find_lists_on_slide(self, slide: Slide, check_bullet: bool, check_numbered: bool, check_nested: bool) -> List[Tuple[str, int, int]]:
-        """Находит все списки на слайде и возвращает информацию о них"""
         lists_info = []
         current_list = None
         list_start_position = 0
@@ -100,7 +97,6 @@ class ListItemsCountCheck(SlideCheck):
         return lists_info
     
     def _get_list_type_name(self, list_type: ListType) -> str:
-        """Возвращает читаемое название типа списка"""
         type_names = {
             ListType.BULLET: "маркированный",
             ListType.NUMBERED: "нумерованный",
@@ -109,12 +105,9 @@ class ListItemsCountCheck(SlideCheck):
         }
         return type_names.get(list_type, "неизвестный")
 
-
 class NestedListsDepthCheck(SlideCheck):
-    """Проверка глубины вложенности списков"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """        Проверяет максимальную глубину вложенности списков"""
         max_depth = self.params.get('max_depth', 2)  
         check_bullet = self.params.get('check_bullet', True)
         check_numbered = self.params.get('check_numbered', True)
@@ -156,7 +149,6 @@ class NestedListsDepthCheck(SlideCheck):
         )
     
     def _get_list_type_name(self, list_type: ListType) -> str:
-        """Возвращает читаемое название типа списка"""
         type_names = {
             ListType.BULLET: "маркированный",
             ListType.NUMBERED: "нумерованный",
@@ -165,14 +157,9 @@ class NestedListsDepthCheck(SlideCheck):
         }
         return type_names.get(list_type, "неизвестный")
 
-
 class MixedListsCheck(SlideCheck):
-    """Проверка смешанных типов списков на одном слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """
-        Проверяет что на слайде не смешаны разные типы списков
-        """
         allow_mixed = self.params.get('allow_mixed', False)
         
         if allow_mixed:
@@ -209,7 +196,6 @@ class MixedListsCheck(SlideCheck):
         )
     
     def _get_list_type_name(self, list_type: ListType) -> str:
-        """Возвращает читаемое название типа списка"""
         type_names = {
             ListType.BULLET: "маркированный",
             ListType.NUMBERED: "нумерованный",

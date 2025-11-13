@@ -3,9 +3,7 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Slide
 from typing import Dict, Any, Union, List
 
-
 class HeadingPresenceCheck(SlideCheck):
-    """Проверка наличия заголовка на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         required = self.params.get('required', True)
@@ -36,7 +34,6 @@ class HeadingPresenceCheck(SlideCheck):
         )
     
     def _detect_heading(self, slide: Slide) -> bool:
-        """Определяет наличие заголовка на основе размера шрифта и позиции"""
         if not slide.blocks:
             return False
         

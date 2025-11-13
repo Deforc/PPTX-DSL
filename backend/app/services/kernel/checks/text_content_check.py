@@ -5,10 +5,8 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Slide
 
 class LongPhrasesCheck(SlideCheck):
-    """Проверка длинных фраз в тексте слайда"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет наличие слишком длинных фраз без переносов"""
         max_phrase_length = self.params.get('max_length', 80)
         long_phrases = []
         
@@ -41,26 +39,21 @@ class LongPhrasesCheck(SlideCheck):
         )
     
     def _split_into_sentences(self, text: str) -> List[str]:
-        """Разбивает текст на предложения"""
         if not text:
             return []        
         sentences = re.split(r'[.!?]+', text)
         return [s.strip() for s in sentences if s.strip()]
     
     def _split_into_phrases(self, sentence: str) -> List[str]:
-        """Разбивает предложение на фразы"""
         if not sentence:
             return []
         
         phrases = re.split(r'[,;:]+', sentence)
         return [p.strip() for p in phrases if p.strip()]
 
-
 class ParagraphLengthCheck(SlideCheck):
-    """Проверка длины абзацев на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет длину абзацев на слайде"""
         max_paragraph_length = self.params.get('max_length', 300)  
         min_paragraph_length = self.params.get('min_length', 10)   
         long_paragraphs = []
@@ -98,12 +91,9 @@ class ParagraphLengthCheck(SlideCheck):
             message=f"Слайд {slide.page_number}: длина абзацев в норме"
         )
 
-
 class SentenceCountCheck(SlideCheck):
-    """Проверка количества предложений в абзацах"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет что абзацы содержат разумное количество предложений"""
         max_sentences = self.params.get('max_sentences', 5)
         min_sentences = self.params.get('min_sentences', 1)
         
@@ -138,21 +128,15 @@ class SentenceCountCheck(SlideCheck):
         )
     
     def _count_sentences(self, text: str) -> int:
-        """Считает количество предложений в тексте"""
         if not text.strip():
             return 0
         
         sentences = re.split(r'[.!?]+', text)
         return len([s for s in sentences if s.strip()])
 
-
 class TextDensityCheck(SlideCheck):
-    """Проверка плотности текста на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """
-        Проверяет общую плотность текста на слайде
-        """
         max_total_chars = self.params.get('max_total_chars', 1500)
         max_blocks = self.params.get('max_blocks', 10)
         
@@ -181,12 +165,9 @@ class TextDensityCheck(SlideCheck):
             message=f"Слайд {slide.page_number}: плотность текста в норме"
         )
 
-
 class CapitalizationCheck(SlideCheck):
-    """Проверка правильности капитализации (заглавных букв)"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет правильность использования заглавных букв"""
         check_titles = self.params.get('check_titles', True)
         check_sentences = self.params.get('check_sentences', True)
         
@@ -220,7 +201,6 @@ class CapitalizationCheck(SlideCheck):
         )
     
     def _check_sentence_capitalization(self, text: str, paragraph_num: int) -> List[str]:
-        """Проверяет капитализацию предложений"""
         issues = []
         sentences = re.split(r'[.!?]+', text)
         

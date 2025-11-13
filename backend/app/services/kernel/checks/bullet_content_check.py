@@ -4,10 +4,8 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation, Slide, Paragraph
 
 class BulletConsistencyCheck(SlideCheck):
-    """Проверка согласованности маркированных списков"""
     
     def validate(self, slide: Slide) -> ValidationResult:
-        """Проверяет согласованность пунктов маркированных списков"""
         check_parallelism = self.params.get('check_parallelism', True)
         check_punctuation = self.params.get('check_punctuation', True)
         
@@ -47,7 +45,6 @@ class BulletConsistencyCheck(SlideCheck):
         )
     
     def _check_parallelism(self, bullet_paragraphs: List[Paragraph]) -> List[str]:
-        """Проверяет параллельную структуру пунктов списка"""
       
         issues = []
         first_words = []
@@ -63,7 +60,6 @@ class BulletConsistencyCheck(SlideCheck):
         return issues
     
     def _check_punctuation(self, bullet_paragraphs: List[Paragraph]) -> List[str]:
-        """Проверяет согласованность пунктуации в списке"""
         issues = []
         endings = []
         

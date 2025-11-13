@@ -6,7 +6,6 @@ from app.services.pdf.page_number import PageNumberDetector
 from app.domain.entities import Presentation
 
 class PdfProcessingService:
-    """Главный сервис для обработки PDF"""
     
     def __init__(self):
         self.extractor = PdfPlumberExtractor()
@@ -15,7 +14,6 @@ class PdfProcessingService:
         self.page_number_detector = PageNumberDetector()
     
     def process_pdf(self, file_path: Path) -> Presentation:
-        """Обрабатывает PDF файл через все этапы"""
 
         raw_presentation = self.extractor.extract(file_path)
         

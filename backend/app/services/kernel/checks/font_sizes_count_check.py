@@ -3,9 +3,7 @@ from app.services.kernel.validation_result import ValidationResult, ValidationSt
 from app.domain.entities import Presentation, Slide
 from typing import Dict, Any, Union, List
 
-
 class FontSizesCountPresentationCheck(PresentationCheck):
-    """Проверка количества различных размеров шрифтов в презентации"""
     
     def validate(self, presentation: Presentation) -> ValidationResult:
         font_sizes = set()
@@ -33,9 +31,7 @@ class FontSizesCountPresentationCheck(PresentationCheck):
             message=f"Количество размеров шрифтов {sizes_count} в допустимых пределах"
         )
 
-
 class FontSizesCountSlideCheck(SlideCheck):
-    """Проверка количества различных размеров шрифтов на слайде"""
     
     def validate(self, slide: Slide) -> ValidationResult:
         font_sizes = set()
@@ -61,4 +57,3 @@ class FontSizesCountSlideCheck(SlideCheck):
             rule_name=self.rule_name,
             message=f"Слайд {slide.page_number}: количество размеров шрифтов {sizes_count} в норме"
         )
-
