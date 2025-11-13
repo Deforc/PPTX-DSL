@@ -106,7 +106,7 @@ export default {
     this.statusText = 'Проверка...'
 
     try {
-      const response = await fetch('http://localhost:8000/validate', {
+      const response = await fetch('http://localhost:8000/api/v1/validate', {
         method: 'POST',
         body: formData
       })
