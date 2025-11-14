@@ -146,7 +146,7 @@ export default {
     this.logLines = []
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/validate', {
+      const response = await fetch('https://pptx-dsl.onrender.com/api/v1/validate', {
         method: 'POST',
         body: formData
       })
