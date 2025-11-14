@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     ENV: str = "development"
 
     API_V1_PREFIX: str = "/api/v1"
-    CORS_ORIGINS: List[str] = ["http://localhost:5173"]
+    CORS_ORIGINS: List[str] = ["http://localhost:5173", "https://pptx-dsl.vercel.app"]
 
     UPLOAD_DIR: str = "storage/uploads"
     MAX_PDF_MB: int = 25
